@@ -1,0 +1,15 @@
+version: '3.2'
+
+services:
+  cron_server:
+    image: webiks/cron_server:latest
+    container_name: stress
+    ports:
+      - "3000:3000"
+    networks:
+      - monitor
+
+networks:
+  monitor:
+    external:
+      name: monitor

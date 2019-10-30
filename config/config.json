@@ -1,0 +1,14 @@
+{
+  "server": {
+    "PORT": 3000
+  },
+  "cron": {
+    "options": {
+      "scheduled": true,
+      "timezone": "Asia/Jerusalem"
+    }
+  },
+  "task": {
+    "command": "notepad"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "name": "cron_server",
+  "version": "1.0.0",
+  "description": "New Monitor Cron",
+  "author": "chaim@webiks.com",
+  "license": "MIT",
+  "main": "src/server.js",
+  "files": [],
+  "keywords": [],
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "src/node_modules/.bin/nodemon -L",
+    "test": "echo \"No test specified\" && exit 0",
+    "deploy:clean": "docker image prune -f",
+    "deploy:build": "docker build . -t webiks/cron_server:latest",
+    "deploy:tag": "docker tag webiks/cron_server:latest webiks/cron_server:latest",
+    "deploy:push": "docker push webiks/cron_server:latest",
+    "upload": "npm run deploy:build && npm run deploy:tag && npm run deploy:push",
+    "deploy:remove": "docker rm -f webiks/cron_server",
+    "deploy:run": "docker run --name stress -p 3000:3000 -e webiks/cron_server",
+    "deploy:full": "npm run deploy:build && npm run deploy:remove && npm run deploy:run"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "node-cron": "^2.0.3",
+    "body-parser": "^1.18.3",
+    "cors": "^2.8.5",
+    "uuid": "^3.3.3"
+  },
+  "devDependencies": {
+    "dockerode": "^2.5.5",
+    "nodemon": "^1.18.3",
+    "npm": "^6.2.0",
+    "rimraf": "^2.6.3"
+  }
+}
