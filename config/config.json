@@ -9,6 +9,6 @@
     }
   },
   "task": {
-    "command": "notepad"
+    "command": "stress-ng"
   }
 }
