@@ -2,18 +2,14 @@
 
 const uuid = require('uuid/v4');
 const {Router} = require('express');
-const cron = require('node-cron');
 
 const config = require('../../config/config.json');
-const logger = require('../modules/logger');
-const execute = require('../handlers/cronHendler');
-const storage = require('../handlers/storageHendler');
+const cronHandler = require('../handlers/cronHandler');
+const storage = require('../handlers/storageHandler');
 
 const router = Router();
 
 const command = config.task.command;
-
-
 
 router.get('/stress', (req, res) => {
   const tasks = [];
@@ -42,30 +38,8 @@ router.post('/stress/?', (req, res) => {
   }
   const exp = req.query.exp.toString();
   const args = req.query.args.toString();
-  let processId = undefined;
-  const scheduledTask = cron.schedule(exp,
-    () => {
-      execute(command, args)
-        .then( (pid) => {
-          processId = pid;
-          console.log(`${(new Date()).toISOString()} Spawning new task w/ PID ${pid} Exp ${exp}, Id:[${id}] and arguments < ${args} >`);
-        })
-        .catch((err) => {
-          console.log(`${(new Date()).toISOString()}`, err.stack);
-        });
-    },
-    {
-      scheduled: config.cron.options.scheduled,
-      timezone: config.cron.options.timezone
-    }
-  );
-  const task = {
-    processId,
-    scheduledTask,
-    exp,
-    args
-  };
-  const id = uuid();
+   const id = uuid();
+  const task = cronHandler.setCron(exp, command, args);
   storage.set(id, task);
   return res.json({ pid: processId, id: id, exp: exp, args: args });
 });
@@ -75,7 +49,7 @@ router.delete('/stress', (req, res) => {
   storage.forEach((task, id) => {
     tasks.push( { pid: task.processId, id: id, exp: task.exp, args: task.args } );
     task.scheduledTask.destroy();
-    console.log(`Cron id ${id} with exp ${task.exp} and args ${task.args} has been deleted`);
+    console.log(`${(new Date()).toISOString()} Cron id ${id} with exp ${task.exp} and args ${task.args} has been deleted`);
     storage.delete(id);
   });
   return res.json({ operation: 'Delete all tasks', tasks: tasks });
@@ -86,7 +60,7 @@ router.delete('/stress/:id', (req, res) => {
   if (storage.has(id)) {
     const task = storage.get(id);
     task.scheduledTask.destroy();
-    console.log(`Cron id ${id} with exp ${task.exp} and args ${task.args} has been deleted`);
+    console.log(`${(new Date()).toISOString()} Cron id ${id} with exp ${task.exp} and args ${task.args} has been deleted`);
     storage.delete(id);
     return res.json({ operation: 'Delete a task', pid: task.processId, id: id, exp: task.exp, args: task.args });
   }
