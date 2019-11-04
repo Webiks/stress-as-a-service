@@ -41,7 +41,7 @@ router.post('/stress/?', (req, res) => {
    const id = uuid();
   const task = cronHandler.setCron(exp, command, args);
   storage.set(id, task);
-  return res.json({ pid: processId, id: id, exp: exp, args: args });
+  return res.json({ pid: task.processId, id: id, exp: task.exp, args: task.args });
 });
 
 router.delete('/stress', (req, res) => {
