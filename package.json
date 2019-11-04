@@ -1,6 +1,6 @@
 {
   "name": "cron_server",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "New Monitor Cron",
   "author": "chaim@webiks.com",
   "license": "MIT",
@@ -11,8 +11,8 @@
     "start": "node src/server.js",
     "dev": "src/node_modules/.bin/nodemon -L",
     "test": "echo \"No test specified\" && exit 0",
-    "docker:build": "docker build . -t webiks/cron_server:1.1.0",
-    "docker:tag": "docker tag webiks/cron_server:1.1.0 webiks/cron_server:latest",
+    "docker:build": "docker build . -t webiks/cron_server:1.1.1",
+    "docker:tag": "docker tag webiks/cron_server:1.1.1 webiks/cron_server:latest",
     "docker:start": "docker-compose up -d",
     "docker:stop": "docker-compose down",
     "docker:clean": "docker image prune -f",
