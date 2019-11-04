@@ -1,6 +1,5 @@
 'use strict';
 
-// const {spawn} = require('child_process');
 const uuid = require('uuid/v4');
 const {Router} = require('express');
 const cron = require('node-cron');
@@ -8,12 +7,13 @@ const cron = require('node-cron');
 const config = require('../../config/config.json');
 const logger = require('../modules/logger');
 const execute = require('../handlers/cronHendler');
+const storage = require('../handlers/storageHendler');
 
 const router = Router();
 
 const command = config.task.command;
 
-const storage = new Map([]);
+
 
 router.get('/stress', (req, res) => {
   const tasks = [];
@@ -48,10 +48,10 @@ router.post('/stress/?', (req, res) => {
       execute(command, args)
         .then( (pid) => {
           processId = pid;
-          console.log(`${Date.now()} Spawning new task w/ PID ${pid} Exp ${exp}, Id:[${id}] and arguments < ${args} >`);
+          console.log(`${(new Date()).toISOString()} Spawning new task w/ PID ${pid} Exp ${exp}, Id:[${id}] and arguments < ${args} >`);
         })
         .catch((err) => {
-          console.log(`${Date.now()}`, err.stack);
+          console.log(`${(new Date()).toISOString()}`, err.stack);
         });
     },
     {
@@ -91,35 +91,5 @@ router.delete('/stress/:id', (req, res) => {
   else
     return res.status(404).send(`id [${id}] not found!`);
 });
-
-// function execute(args) {
-//   return new Promise((resolve, reject) => {
-//     if (typeof (args) === 'string') {
-//       args = args.split(' ');
-//     }
-//     if (!(args instanceof Array)) {
-//       reject('Arguments must be string or array');
-//     }
-//     const command = config.task.command;
-//     console.log(command, " ", args);
-//     const process = spawn(command, args);
-//     process.on('exit', (code, signal) => {
-//       if (code === 0) {
-//         console.log(`child process exited with code ${code}`);
-//       } else {
-//         reject(`Exit code: ${code}, exit signal: ${signal}`);
-//       }
-//     });
-//     process.stdout.setEncoding('utf8');
-//     process.stdout.on('data', (data) => {
-//       console.log(`stdout: ${data}`);
-//     });
-//     process.stderr.setEncoding('utf8');
-//     process.stderr.on('data', (data) => {
-//       console.log(`stdout: ${data}`);
-//     });
-//     resolve(process.pid);
-//   });
-// }
 
 module.exports = router;

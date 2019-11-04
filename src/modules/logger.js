@@ -1,5 +1,5 @@
 module.exports = (req, res, next) => {
   // task: save to a file
-  console.log(`Time:  ${Date.now()} : ${req.url}`);
+  console.log(`${(new Date()).toISOString()},  URL: ${req.method} ${req.url}`);
   next();
 };
