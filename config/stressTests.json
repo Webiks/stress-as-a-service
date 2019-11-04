@@ -1,10 +1,10 @@
 [
   {
-    "exp": "*/1 * * * *",
-    "args": "--all 4 −−timeout 30s"
+    "exp": "*/15 * * * * *",
+    "args": "-V"
   },
   {
-    "exp": "* */3 * * *",
-    "args": "−−cpu 0 −−timeout 60s"
+    "exp": "* */3 * * * *",
+    "args": "−−verbose"
   }
 ]
