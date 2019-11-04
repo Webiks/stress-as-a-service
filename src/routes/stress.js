@@ -75,6 +75,7 @@ router.delete('/stress', (req, res) => {
   storage.forEach((task, id) => {
     tasks.push( { pid: task.processId, id: id, exp: task.exp, args: task.args } );
     task.scheduledTask.destroy();
+    console.log(`Cron id ${id} with exp ${task.exp} and args ${task.args} has been deleted`);
     storage.delete(id);
   });
   return res.json({ operation: 'Delete all tasks', tasks: tasks });
@@ -85,6 +86,7 @@ router.delete('/stress/:id', (req, res) => {
   if (storage.has(id)) {
     const task = storage.get(id);
     task.scheduledTask.destroy();
+    console.log(`Cron id ${id} with exp ${task.exp} and args ${task.args} has been deleted`);
     storage.delete(id);
     return res.json({ operation: 'Delete a task', pid: task.processId, id: id, exp: task.exp, args: task.args });
   }
