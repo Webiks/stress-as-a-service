@@ -17,7 +17,7 @@
     "docker:clean": "docker image prune -f",
     "docker:remove": "docker rm -f webiks/cron_server",
     "aws:deploy": "sh -x ./scripts/deploy.sh",
-    "aws:full": "npm run docker:build && npm run docker:tag && npm run aws:deploy"
+    "aws:full": "npm run docker:build && npm run aws:deploy"
   },
   "repository": {
     "type": "git",
