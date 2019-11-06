@@ -69,11 +69,10 @@ function onload() {
   const command = config.task.command;
   const tests = stressTests;
   tests.forEach((test) => {
-    const exp = test.exp.toString();
-    const args = test.args.toString();
-    console.log(`Exp: ${exp}, Args: ${args}`);
+    const exp = test.exp;
+    const args = test.args;
     const task = setCron(exp, command, args);
-    const id = uuid();
+    const id = test.id;
     storage.set(id, task);
     console.log(`${(new Date()).toISOString()} Id: ${id}, Exp: ${exp}, Args: ${args}`);
   });

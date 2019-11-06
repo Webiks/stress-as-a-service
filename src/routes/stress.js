@@ -1,9 +1,11 @@
 'use strict';
 
+const fs = require('fs');
 const uuid = require('uuid/v4');
 const {Router} = require('express');
 
 const config = require('../../config/config.json');
+const stressTests = require('../../config/stressTests');
 const cronHandler = require('../handlers/cronHandler');
 const storage = require('../handlers/storageHandler');
 
@@ -41,6 +43,7 @@ router.post('/stress/?', (req, res) => {
    const id = uuid();
   const task = cronHandler.setCron(exp, command, args);
   storage.set(id, task);
+  add( { id: id, exp: task.exp, args: task.args});
   return res.json({ pid: task.processId, id: id, exp: task.exp, args: task.args });
 });
 
@@ -51,6 +54,7 @@ router.delete('/stress', (req, res) => {
     task.scheduledTask.destroy();
     console.log(`${(new Date()).toISOString()} Cron id ${id} with exp ${task.exp} and args ${task.args} has been deleted`);
     storage.delete(id);
+    remove(id);
   });
   return res.json({ operation: 'Delete all tasks', tasks: tasks });
 });
@@ -62,10 +66,23 @@ router.delete('/stress/:id', (req, res) => {
     task.scheduledTask.destroy();
     console.log(`${(new Date()).toISOString()} Cron id ${id} with exp ${task.exp} and args ${task.args} has been deleted`);
     storage.delete(id);
+    remove(id);
     return res.json({ operation: 'Delete a task', pid: task.processId, id: id, exp: task.exp, args: task.args });
   }
   else
     return res.status(404).send(`id [${id}] not found!`);
 });
+
+function add(obj) {
+  stressTests.push(obj);
+  fs.writeFileSync('./config/stressTests.json', JSON.stringify(stressTests, null, 2));
+}
+
+function remove(id) {
+  const arr = stressTests.filter( (obj) => {
+    return obj.id !== id
+  });
+  fs.writeFileSync('./config/stressTests.json', JSON.stringify(arr, null, 2));
+}
 
 module.exports = router;
