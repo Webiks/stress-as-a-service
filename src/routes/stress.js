@@ -1,19 +1,18 @@
 'use strict';
 
-// const {spawn} = require('child_process');
+const fs = require('fs');
 const uuid = require('uuid/v4');
 const {Router} = require('express');
-const cron = require('node-cron');
 
 const config = require('../../config/config.json');
-const logger = require('../modules/logger');
-const execute = require('../handlers/cronHendler');
+const stressTests = require('../../config/stressTests');
+const cronHandler = require('../handlers/cronHandler');
+const storage = require('../handlers/storageHandler');
 
 const router = Router();
 
 const command = config.task.command;
-
-const storage = new Map([]);
+const fileName = './config/' + config.server.cronJobFile;
 
 router.get('/stress', (req, res) => {
   const tasks = [];
@@ -42,32 +41,11 @@ router.post('/stress/?', (req, res) => {
   }
   const exp = req.query.exp.toString();
   const args = req.query.args.toString();
-  let processId = undefined;
-  const scheduledTask = cron.schedule(exp,
-    () => {
-      execute(command, args)
-        .then( (pid) => {
-          processId = pid;
-          console.log(`${Date.now()} Spawning new task w/ PID ${pid} Exp ${exp}, Id:[${id}] and arguments < ${args} >`);
-        })
-        .catch((err) => {
-          console.log(`${Date.now()}`, err.stack);
-        });
-    },
-    {
-      scheduled: config.cron.options.scheduled,
-      timezone: config.cron.options.timezone
-    }
-  );
-  const task = {
-    processId,
-    scheduledTask,
-    exp,
-    args
-  };
-  const id = uuid();
+   const id = uuid();
+  const task = cronHandler.setCron(exp, command, args);
   storage.set(id, task);
-  return res.json({ pid: processId, id: id, exp: exp, args: args });
+  addCronJobToFile( { id: id, exp: task.exp, args: task.args});
+  return res.json({ pid: task.processId, id: id, exp: task.exp, args: task.args });
 });
 
 router.delete('/stress', (req, res) => {
@@ -75,7 +53,9 @@ router.delete('/stress', (req, res) => {
   storage.forEach((task, id) => {
     tasks.push( { pid: task.processId, id: id, exp: task.exp, args: task.args } );
     task.scheduledTask.destroy();
+    console.log(`${(new Date()).toISOString()} Cron id ${id} with exp ${task.exp} and args ${task.args} has been deleted`);
     storage.delete(id);
+    removeCronJobFromFile(id);
   });
   return res.json({ operation: 'Delete all tasks', tasks: tasks });
 });
@@ -85,41 +65,25 @@ router.delete('/stress/:id', (req, res) => {
   if (storage.has(id)) {
     const task = storage.get(id);
     task.scheduledTask.destroy();
+    console.log(`${(new Date()).toISOString()} Cron id ${id} with exp ${task.exp} and args ${task.args} has been deleted`);
     storage.delete(id);
+    removeCronJobFromFile(id);
     return res.json({ operation: 'Delete a task', pid: task.processId, id: id, exp: task.exp, args: task.args });
   }
   else
     return res.status(404).send(`id [${id}] not found!`);
 });
 
-// function execute(args) {
-//   return new Promise((resolve, reject) => {
-//     if (typeof (args) === 'string') {
-//       args = args.split(' ');
-//     }
-//     if (!(args instanceof Array)) {
-//       reject('Arguments must be string or array');
-//     }
-//     const command = config.task.command;
-//     console.log(command, " ", args);
-//     const process = spawn(command, args);
-//     process.on('exit', (code, signal) => {
-//       if (code === 0) {
-//         console.log(`child process exited with code ${code}`);
-//       } else {
-//         reject(`Exit code: ${code}, exit signal: ${signal}`);
-//       }
-//     });
-//     process.stdout.setEncoding('utf8');
-//     process.stdout.on('data', (data) => {
-//       console.log(`stdout: ${data}`);
-//     });
-//     process.stderr.setEncoding('utf8');
-//     process.stderr.on('data', (data) => {
-//       console.log(`stdout: ${data}`);
-//     });
-//     resolve(process.pid);
-//   });
-// }
+function addCronJobToFile(obj) {
+  stressTests.push(obj);
+  fs.writeFileSync(fileName, JSON.stringify(stressTests, null, 2));
+}
+
+function removeCronJobFromFile(id) {
+  const arr = stressTests.filter( (obj) => {
+    return obj.id !== id
+  });
+  fs.writeFileSync(fileName, JSON.stringify(arr, null, 2));
+}
 
 module.exports = router;

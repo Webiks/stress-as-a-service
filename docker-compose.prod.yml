@@ -1,0 +1,13 @@
+version: '3.2'
+
+services:
+  cron_server:
+    image: 223455578796.dkr.ecr.us-west-2.amazonaws.com/monitor-stress:latest
+    restart: always
+    container_name: stress
+    volumes:
+      - $PWD/config/stressTests.json:/user/app/config/stressTests.json
+    ports:
+      - "3000:3000"
+    extra_hosts:
+      - "logstash:$ADDRESS"

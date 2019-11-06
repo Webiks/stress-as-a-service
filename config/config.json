@@ -1,6 +1,7 @@
 {
   "server": {
-    "PORT": 3000
+    "PORT": 3000,
+    "cronJobFile": "stressTests.json"
   },
   "cron": {
     "options": {
