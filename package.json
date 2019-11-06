@@ -12,7 +12,6 @@
     "dev": "src/node_modules/.bin/nodemon -L",
     "test": "echo \"No test specified\" && exit 0",
     "docker:build": "sh -x ./scripts/docker-build.sh",
-    "docker:tag": "sh -x ./scripts/docker-tag.sh",
     "docker:start": "docker-compose up -d",
     "docker:stop": "docker-compose down",
     "docker:clean": "docker image prune -f",
