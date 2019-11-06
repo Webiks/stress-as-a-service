@@ -12,6 +12,7 @@ const storage = require('../handlers/storageHandler');
 const router = Router();
 
 const command = config.task.command;
+const fileName = './config/' + config.server.cronJobFile;
 
 router.get('/stress', (req, res) => {
   const tasks = [];
@@ -43,7 +44,7 @@ router.post('/stress/?', (req, res) => {
    const id = uuid();
   const task = cronHandler.setCron(exp, command, args);
   storage.set(id, task);
-  add( { id: id, exp: task.exp, args: task.args});
+  addCronJobToFile( { id: id, exp: task.exp, args: task.args});
   return res.json({ pid: task.processId, id: id, exp: task.exp, args: task.args });
 });
 
@@ -54,7 +55,7 @@ router.delete('/stress', (req, res) => {
     task.scheduledTask.destroy();
     console.log(`${(new Date()).toISOString()} Cron id ${id} with exp ${task.exp} and args ${task.args} has been deleted`);
     storage.delete(id);
-    remove(id);
+    removeCronJobFromFile(id);
   });
   return res.json({ operation: 'Delete all tasks', tasks: tasks });
 });
@@ -66,23 +67,23 @@ router.delete('/stress/:id', (req, res) => {
     task.scheduledTask.destroy();
     console.log(`${(new Date()).toISOString()} Cron id ${id} with exp ${task.exp} and args ${task.args} has been deleted`);
     storage.delete(id);
-    remove(id);
+    removeCronJobFromFile(id);
     return res.json({ operation: 'Delete a task', pid: task.processId, id: id, exp: task.exp, args: task.args });
   }
   else
     return res.status(404).send(`id [${id}] not found!`);
 });
 
-function add(obj) {
+function addCronJobToFile(obj) {
   stressTests.push(obj);
-  fs.writeFileSync('./config/stressTests.json', JSON.stringify(stressTests, null, 2));
+  fs.writeFileSync(fileName, JSON.stringify(stressTests, null, 2));
 }
 
-function remove(id) {
+function removeCronJobFromFile(id) {
   const arr = stressTests.filter( (obj) => {
     return obj.id !== id
   });
-  fs.writeFileSync('./config/stressTests.json', JSON.stringify(arr, null, 2));
+  fs.writeFileSync(fileName, JSON.stringify(arr, null, 2));
 }
 
 module.exports = router;
