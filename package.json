@@ -33,7 +33,7 @@
   "devDependencies": {
     "dockerode": "^2.5.5",
     "nodemon": "^1.18.3",
-    "npm": "^6.2.0",
+    "npm": "^6.13.4",
     "rimraf": "^2.6.3"
   },
   "homepage": "https://github.com/Webiks/stress-as-a-service#readme"
