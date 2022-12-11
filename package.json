@@ -24,7 +24,7 @@
     "url": "git+https://github.com/Webiks/stress-as-a-service.git"
   },
   "dependencies": {
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "node-cron": "^2.0.3",
     "body-parser": "^1.18.3",
     "cors": "^2.8.5",
